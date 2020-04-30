@@ -14,7 +14,18 @@ class FreeDom < Domle
     h = {}
 
     @doc.root.each_recursive do |e|
+      
       h[e.name.to_sym] ||= {}
+
+      # if there's a custom attribute, add a default trigger called trigger_change
+      a = e.attributes.keys.reject {|x| %i(id name class).include? x }
+      e.attributes.merge!({trigger_change: a.first}) if a.any?
+      
+      # add a trigger attribute for each *on* event attribute
+      events = e.attributes.keys.select {|x| x =~ /^on/}\
+          .map {|x| 'trigger_' + x.to_s[/(?<=^on)\w+/]}
+      e.attributes.merge! events.zip(['']*events.length).to_h
+
       h[e.name.to_sym].merge!(e.attributes)
     end
 
@@ -26,9 +37,8 @@ class FreeDom < Domle
 
         a = attributelist.keys
         
-        triggers = a.select {|x| x =~ /^trigger_/ }                
-        
-        attr2_accessor *(a - triggers)
+        triggers = a.select {|x| x =~ /^trigger_/ }                  
+        attr2_accessor *((a - triggers) + %i(onchange)).uniq
         
         triggers.each do |x|
 
@@ -36,21 +46,22 @@ class FreeDom < Domle
           puts 'trigger: ' + trigger.inspect if @debug
           
           define_method(trigger)  do
-            eval method(('on' + trigger.to_s).to_sym).call, $env
+            statement = method(('on' + trigger.to_s).to_sym).call
+            eval statement, $env if statement
           end
 
-          if trigger == :change then
-            
-            #puts 'change found'
+          if trigger == :change then            
             
             attribute = attributelist[x].to_sym
             
             define_method((attribute.to_s + '=').to_sym) do |val|
+
               oldval = attributes[attribute]
               attributes[attribute] = val
-              #puts 'inside change='
+
               @rexle.refresh if @rexle
               change() unless val == oldval
+
               val
             end
             
@@ -97,3 +108,4 @@ class FreeDom < Domle
   end
 
 end
+
