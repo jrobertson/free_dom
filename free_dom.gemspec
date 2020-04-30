@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'free_dom'
-  s.version = '0.1.0'
+  s.version = '0.2.0'
   s.summary = 'Dynamically builds a DOM from XML.'
   s.authors = ['James Robertson']
   s.files = Dir['lib/free_dom.rb']
