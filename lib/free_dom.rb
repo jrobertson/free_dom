@@ -22,7 +22,7 @@ class FreeDom < Domle
       h[e.name.to_sym] ||= {}
 
       # if there's a custom attribute, add a default trigger called trigger_change
-      a = e.attributes.keys.reject {|x| %i(id name class).include? x }
+      a = e.attributes.keys.reject {|x| %i(id name class style).include? x }
       e.attributes.merge!({trigger_change: a.first}) if a.any?
       
       # add a trigger attribute for each *on* event attribute
