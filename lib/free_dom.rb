@@ -3,13 +3,17 @@
 # file: free_dom.rb
 
 require 'domle'
+require 'xml_to_sliml'
 
 
 class FreeDom < Domle
 
-  def initialize(xml, debug: false)
+  def initialize(s, debug: false)
 
-    @doc, @debug = Rexle.new(xml), debug
+    @debug = debug
+
+    xml = s =~ /^</ ? s : LineTree.new(s).to_xml
+    @doc = Rexle.new(xml)
 
     h = {}
 
@@ -82,7 +86,7 @@ class FreeDom < Domle
           .each {|x| e.attributes.delete x }
     end
 
-    super(@doc.root.xml)        
+    super(@doc.root.xml, debug: @debug)        
     script()
                                      
   end
@@ -99,6 +103,14 @@ class FreeDom < Domle
     eval s
     $env = binding
   end                                      
+  
+  def to_sliml()
+
+    xml = @doc.root.element('*').xml(pretty: true)
+    puts 'xml: ' + xml.inspect if @debug
+    XmlToSliml.new(xml.gsub(/ style=''/,"")).to_s
+    
+  end
                                     
 
   private
