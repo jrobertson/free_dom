@@ -6,6 +6,15 @@ require 'domle'
 require 'xml_to_sliml'
 
 
+class Rexle::Element
+  def to_sliml()
+
+    xml = self.xml(pretty: true)
+    XmlToSliml.new(xml.gsub(/ style=''/,"")).to_s
+    
+  end
+end
+
 class FreeDom < Domle
 
   def initialize(s, debug: false)
