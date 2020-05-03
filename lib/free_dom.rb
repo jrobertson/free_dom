@@ -3,6 +3,7 @@
 # file: free_dom.rb
 
 require 'domle'
+require 'line-tree'
 require 'xml_to_sliml'
 
 
